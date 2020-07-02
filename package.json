@@ -1,0 +1,31 @@
+{
+  "name": "flow-backend",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "sudo $(which node) $(which forever) start index.js",
+    "stop": "sudo $(which node) $(which forever) stop index.js",
+    "start-browser": "sudo xvfb-run $(which node) index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/modulesio/webaverse-server.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/modulesio/webaverse-server/issues"
+  },
+  "homepage": "https://github.com/modulesio/webaverse-server#readme",
+  "dependencies": {
+    "@onflow/bytes": "0.0.2",
+    "@onflow/fcl": "0.0.38",
+    "@onflow/sdk": "0.0.23",
+    "@onflow/types": "0.0.2",
+    "elliptic": "^6.5.3",
+    "express": "^4.17.1",
+    "sha3": "^2.1.2"
+  }
+}
