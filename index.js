@@ -403,6 +403,7 @@ child_process.spawn('flow', [
   'start',
   '-v',
   '--persist',
+  '--http-port', 4000 + '',
 ], {
   stdio: 'inherit',
 });
