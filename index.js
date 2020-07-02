@@ -32,6 +32,97 @@ const _makePromise = () => {
 
 (async () => {
 
+let contractsInitializeTriggered = false;
+const contractsInitializedPromise = _makePromise();
+const waitForContractsInitialized = async () => {
+  if (!contractsInitializeTriggered) {
+    contractsInitializeTriggered = true;
+
+    (async () => {
+      const metaKeys = genKeys();
+      let metaAddr, metaSf;
+
+      const acctResponse = await sdk.send(await sdk.pipe(await sdk.build([
+        sdk.getAccount(serviceAddress),
+      ]), [
+        sdk.resolve([
+          sdk.resolveParams,
+        ]),
+      ]), { node: "http://localhost:8080" });
+      const seqNum = acctResponse.account.keys[0].sequenceNumber;
+
+      {
+        const code = `\
+          pub contract MetaContract {
+            pub resource Vault {
+              pub var contracts: {String: Address}
+              pub var keys: {String: String}
+              init() {
+                self.contracts = {}
+                self.keys = {}
+              }
+            }
+
+            init() {
+              let vault <- create Vault()
+              self.account.save(<-vault, to: /storage/MainVault)
+
+              self.account.link<&Vault>(/public/Vault, target: /storage/MainVault)
+            }
+          }
+        `;
+        const response = await sdk.send(await sdk.pipe(await sdk.build([
+          sdk.params([
+            sdk.param(metaKeys.flowKey, t.Identity, "publicKey"),
+            sdk.param(code ? ('[' + new TextEncoder().encode(code).map(n => '0x' + n.toString(16)).join(',') + ']') : '', t.Identity, "code"),
+          ]),
+          sdk.authorizations([sdk.authorization(serviceAddress, sf, 0)]),
+          sdk.payer(sdk.authorization(serviceAddress, sf, 0)),
+          sdk.proposer(sdk.authorization(serviceAddress, sf, 0, seqNum)),
+          sdk.limit(100),
+          sdk.transaction`
+            transaction {
+              let payer: AuthAccount
+              prepare(payer: AuthAccount) {
+                self.payer = payer
+              }
+              execute {
+                let account = AuthAccount(payer: self.payer)
+                account.addPublicKey("${p => p.publicKey}".decodeHex())
+                account.setCode(${p => p.code})
+              }
+            }
+          `,
+        ]), [
+          sdk.resolve([
+            sdk.resolveParams,
+            sdk.resolveAccounts,
+            sdk.resolveSignatures,
+          ]),
+        ]), { node: "http://localhost:8080" });
+
+        const response2 = await sdk.send(await sdk.pipe(await sdk.build([
+          sdk.getTransactionStatus(response.transactionId),
+        ]), [
+          sdk.resolve([
+            sdk.resolveParams,
+          ]),
+        ]), { node: "http://localhost:8080" });
+
+        metaAddr = response2.transaction.events.length >= 1 ? response2.transaction.events[0].payload.value.fields[0].value.value.slice(2) : null;
+        // console.log('got response', response2, metaAddr);
+        metaSf = signingFunction(metaKeys.privateKey);
+      }
+
+      contractsInitializedPromise.accept({
+        address: metaAddr,
+        keys: metaKeys,
+        sf: metaSf,
+      });
+    })();
+  }
+  return await contractsInitializedPromise;
+};
 const _handleContracts = async (req, res) => {
   const _respond = (statusCode, body) => {
     res.statusCode = statusCode;
