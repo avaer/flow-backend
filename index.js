@@ -402,7 +402,7 @@ child_process.spawn('flow', [
   'emulator',
   'start',
   '-v',
-  // '--persist',
+  '--persist',
 ], {
   stdio: 'inherit',
 });
