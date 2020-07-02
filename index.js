@@ -18,6 +18,7 @@ const {signingFunction} = require('./signing-function.js');
 const flowJson = require('./flow.json');
 const serviceAddress = flowJson.accounts.service.address;
 const sf = signingFunction(flowJson.accounts.service.privateKey);
+const flowHost = 'http://localhost:4000';
 
 const _makePromise = () => {
   let accept, reject;
@@ -48,7 +49,7 @@ const waitForContractsInitialized = async () => {
         sdk.resolve([
           sdk.resolveParams,
         ]),
-      ]), { node: "http://localhost:8080" });
+      ]), { node: flowHost });
       const seqNum = acctResponse.account.keys[0].sequenceNumber;
 
       {
@@ -99,7 +100,7 @@ const waitForContractsInitialized = async () => {
             sdk.resolveAccounts,
             sdk.resolveSignatures,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
 
         const response2 = await sdk.send(await sdk.pipe(await sdk.build([
           sdk.getTransactionStatus(response.transactionId),
@@ -107,7 +108,7 @@ const waitForContractsInitialized = async () => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
 
         metaAddr = response2.transaction.events.length >= 1 ? response2.transaction.events[0].payload.value.fields[0].value.value.slice(2) : null;
         // console.log('got response', response2, metaAddr);
@@ -176,7 +177,7 @@ const _handleContracts = async (req, res) => {
         sdk.resolveAccounts,
         sdk.resolveSignatures,
       ]),
-    ]), { node: "http://localhost:8080" });
+    ]), { node: flowHost });
     if (response.encodedData.value) {
       const address = response.encodedData.value.value.slice(2);
 
@@ -203,7 +204,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolveAccounts,
           sdk.resolveSignatures,
         ]),
-      ]), { node: "http://localhost:8080" });
+      ]), { node: flowHost });
       const keys = JSON.parse(response2.encodedData.value.value);
 
       return {
@@ -244,7 +245,7 @@ const _handleContracts = async (req, res) => {
         sdk.resolveAccounts,
         sdk.resolveSignatures,
       ]),
-    ]), { node: "http://localhost:8080" });
+    ]), { node: flowHost });
     const keys = response.encodedData.value.map(o => o.value);
     _respond(200, JSON.stringify(keys));
   } else if (method === 'GET') {
@@ -268,7 +269,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         const seqNum = acctResponse.account.keys[0].sequenceNumber;
 
         const response = await sdk.send(await sdk.pipe(await sdk.build([
@@ -304,7 +305,7 @@ const _handleContracts = async (req, res) => {
             sdk.resolveAccounts,
             sdk.resolveSignatures,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         console.log('got contract response 1', response.transactionId);
 
         const response2 = await sdk.send(await sdk.pipe(await sdk.build([
@@ -313,7 +314,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         console.log('got contract response 2', response2);
 
         addr2 = response2.transaction.events.length >= 1 ? response2.transaction.events[0].payload.value.fields[0].value.value.slice(2) : null;
@@ -326,7 +327,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         const seqNum = acctResponse.account.keys[0].sequenceNumber;
 
         const response = await sdk.send(await sdk.pipe(await sdk.build([
@@ -361,7 +362,7 @@ const _handleContracts = async (req, res) => {
             sdk.resolveAccounts,
             sdk.resolveSignatures,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         console.log('got contract response 3', response.transactionId);
 
         const response2 = await sdk.send(await sdk.pipe(await sdk.build([
@@ -370,7 +371,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         console.log('got contract response 4', response2);
       }
 
@@ -390,7 +391,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         const seqNum = acctResponse.account.keys[0].sequenceNumber;
 
         const response = await sdk.send(await sdk.pipe(await sdk.build([
@@ -420,7 +421,7 @@ const _handleContracts = async (req, res) => {
             sdk.resolveAccounts,
             sdk.resolveSignatures,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         console.log('got update contract response 1', response.transactionId);
 
         const response2 = await sdk.send(await sdk.pipe(await sdk.build([
@@ -429,7 +430,7 @@ const _handleContracts = async (req, res) => {
           sdk.resolve([
             sdk.resolveParams,
           ]),
-        ]), { node: "http://localhost:8080" });
+        ]), { node: flowHost });
         console.log('got update contract response 2', response2);
 
         // addr2 = response2.transaction.events.length >= 1 ? response2.transaction.events[0].payload.value.fields[0].value.value.slice(2) : null;
